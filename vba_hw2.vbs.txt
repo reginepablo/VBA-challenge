@@ -1,0 +1,155 @@
+sub Stock_Market_Calc()
+
+'Define Variables --
+Dim ticker As StringDim op_year As DoubleDim cl_year As DoubleDim total_volume As DoubleDim total_row As IntegerDim ws As WorksheetDim end_row As Double
+
+
+'Initialize through each worksheet --
+For Each ws in Worksheets
+
+total_row = 2
+
+'Set Headings in Worksheets --
+    ws.Cells(1, 10).Value = "Ticker"
+    ws.Cells(1, 11).Value = "Yearly Change
+    ws.Cells(1, 12).Value = "Percent Change"
+    ws.Cells(1, 13).Value = "Total Stock Volume"
+
+    end_row = ws.Cells(Rows.Count, 1).End(xlUp).Row
+
+
+    For i = 2 to end_row
+
+'Set ticker --
+        If (ws.Cells(i, 3).Value = 0) Then
+
+            If (ws.Cells(i + 1).Value <> ws.Cells(i, 1).Value) Then
+                ticker = ws.Cells(i, 1).Value
+
+            End if
+
+
+        Elseif (ws.Cells(i + 1, 1).Value = ws.Cells(i, 1).Value) Then
+
+            total_volume = total_volume + ws.Cells(i, 7).Value
+      
+            If (ws.Cells(i - 1, 1).Value <> ws.Cells(i, 1).Value) Then
+
+                op_year = ws.Cells(i, 3).Value
+
+            End if
+
+        Else
+
+            ticker = ws.Cells(i, 1).Value
+
+'Total Stock Volume of the Stock --
+            total_volume = total_volume + ws.Cells(i, 7).Value
+            
+            cl_year = ws.Cells(i, 6).Value
+   
+            ws.Cells(total_row, 10).Value = ticker
+            ws.Cells(total_row, 13).Value = total_volume
+
+            If (total_volume > 0) Then
+
+'Calculates Yearly Change --  
+                ws.Cells(total_row, 11).Value = cl_year - op_year
+
+'Set format: positive change in green and negative change in red --
+                    If (ws.Cells(total_row, 11).Value > 0) Then
+
+                        ws.Cells(total_row, 11).Interior.ColorIndex = 4
+
+                    Else
+
+                        ws.Cells(total_row, 11).Interior.ColorIndex = 3
+
+                    End if
+
+'Calculates Percent Change--           
+                ws.Cells(total_row, 12).Value =  ws.Cells(total_row, 11).Value / op_year
+
+            Else
+                
+                ws.Cells(total_row, 11).Value = 0
+                ws.Cells(total_row, 12).Value = 0
+
+            End if
+
+   
+            ws.Cells(total_row, 12).NumberFormat = "0.00%"
+
+            total_volume = 0
+
+            total_row = total_row + 1
+
+        End If
+
+    Next i
+
+' Challenge -- 
+
+'Define Variables --
+    dim greatest_total_volume as double
+    dim increase_percentage as double
+    dim decrease_percentage as double
+    increase_percentage = 0
+    decrease_percentage= 0
+    greatest_total_volume = 0
+
+'Set Headers in Worksheet --
+    ws.Cells(2, 15).Value = "Greatest % Increase"
+    ws.Cells(3, 15).Value = "Greatest % Decrease"
+    ws.Cells(4, 15).Value = "Greatest Total Volume"
+    ws.Cells(1, 16).Value = "Ticker"
+    ws.Cells(1, 17).Value = "Value"
+
+    total_row = total_row - 2
+
+
+    For i = 2 to total_row
+
+'Return Greatest Total Volume --
+        If (ws.Cells(i, 13).Value > greatest_total_volume) Then
+            greatest_total_volume = ws.Cells(i, 13).Value
+
+            ws.Cells(4, 16).Value = ws.Cells(i, 10).Value
+
+        End if
+
+    Next i
+
+    ws.Cells(4, 17).Value = greatest_total_volume
+
+    For i = 2 to total_row
+
+'Returns Greatest % Increase --
+        If (ws.Cells(i, 12).Value > increase_percentage) Then 
+
+            increase_percentage = ws.Cells(i, 12).Value
+            ws.Cells(2, 16) = ws.Cells(i, 10).Value
+
+'Returns Greatest % Decrease --
+        Elseif (ws.Cells(i, 12).Value < decrease_percentage) Then
+
+            decrease_percentage = ws.Cells(i, 12).Value
+            ws.Cells(3, 16).Value = ws.Cells(i, 10).Value
+
+        End If
+
+'Set Percent Format -- 
+    ws.Cells(2, 17).NumberFormat = "0.00%"
+    ws.Cells(3, 17).NumberFormat = "0.00%"
+
+    Next i
+
+    ws.Cells(2, 17).Value = increase_percentage
+    ws.Cells(3, 17).Value = decrease_percentage
+
+
+    ws.Columns("J:Q").AutoFit
+
+Next ws
+
+End sub
